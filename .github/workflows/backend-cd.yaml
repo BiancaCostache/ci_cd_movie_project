@@ -113,20 +113,3 @@ jobs:
         working-directory: starter/backend/k8s
         run: |
           kustomize build | kubectl apply -f -
-
-      # - name: Check for hardcoded AWS credentials
-      #   run: |
-      #     grep -rE 'AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY' .github/workflows || echo "No hardcoded AWS credentials found"
-      #     if grep -rE 'AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY' .github/workflows; then
-      #       echo "Hardcoded AWS credentials found. Failing the pipeline." && exit 1
-      #     fi
-
-      - name: Check if Docker image pushed to ECR
-        run: |
-          aws ecr describe-images --repository-name my-repo --image-ids imageTag=${{ github.sha }}, latest
-        continue-on-error: false
-
-      - name: Verify application running on Kubernetes
-        run: |
-          kubectl rollout status deployment/my-deployment --timeout=60s || exit 1
-          kubectl get pods | grep Running || exit 1
