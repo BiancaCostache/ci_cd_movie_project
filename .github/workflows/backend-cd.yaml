@@ -117,11 +117,11 @@ jobs:
 
       # Apply k8 manifests.
       - name: Apply Kubernetes manifests
-        working-directory: starter/backend/k8s
-        with:
+        env:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
           aws-region: us-east-1
+        working-directory: starter/backend/k8s
         run: |
           kustomize build | kubectl apply -f -
