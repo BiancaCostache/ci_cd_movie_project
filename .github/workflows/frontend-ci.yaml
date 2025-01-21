@@ -41,7 +41,8 @@ jobs:
 
       # Run the linter
       - name: Run the linter
-        run: cd starter/frontend && npm run lint
+        # run: cd starter/frontend && npm run lint
+        run: cd starter/frontend && npx eslint .
 
   test:
     runs-on: ubuntu-latest
