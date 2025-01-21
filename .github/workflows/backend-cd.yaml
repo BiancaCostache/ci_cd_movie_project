@@ -4,9 +4,9 @@ name: Backend Continous Deployment
 on:
   workflow_dispatch:
 
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
 
 jobs:
   lint:
@@ -61,7 +61,7 @@ jobs:
 
       # Run the tests.
       - name: Test run
-        run: cd starter/backend && pipenv run test
+        run: cd starter/backend && pipenv install pytest && pipenv run test
 
   build:
     needs: [lint, test]
@@ -78,33 +78,27 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Build Docker
-        run: |
-          cd starter/backend
-          docker build --tag mp-backend:latest .
-          docker run -p 5000:5000 --name mp-backend -d mp-backend
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
           aws-region: us-east-1
-
+  
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.ECR_REPO_URL }}:${{ github.sha }} starter/backend
-          docker tag ${{ secrets.ECR_REPO_URL }}:${{ github.sha }} ${{ secrets.ECR_REPO_URL }}:latest
+          docker build -t ${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }} starter/backend
+          docker tag ${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }} ${{ secrets.ECR_REPO_URL_BACKEND }}:latest
 
       - name: Push Docker image to ECR
         run: |
-          docker push ${{ secrets.ECR_REPO_URL }}:${{ github.sha }}
-          docker push ${{ secrets.ECR_REPO_URL }}:latest
+          docker push ${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }}
+          docker push ${{ secrets.ECR_REPO_URL_BACKEND }}:latest
 
       - name: Update kubeconfig for EKS
         run: |
@@ -113,7 +107,7 @@ jobs:
       - name: Update Kubernetes manifests with new image tag
         working-directory: starter/backend/k8s
         run: |
-          kustomize edit set image backend=${{ secrets.ECR_REPO_URL }}:${{ github.sha }}
+          kustomize edit set image backend=${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }}
 
       - name: Apply Kubernetes manifests
         working-directory: starter/backend/k8s
