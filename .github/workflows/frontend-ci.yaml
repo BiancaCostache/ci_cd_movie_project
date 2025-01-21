@@ -6,13 +6,9 @@ on:
   workflow_dispatch:
   # Automatic trigger on pull requests merged on main branch
   push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
-    paths:
-     - 'starter/frontend/**'
 
 env:
   REACT_APP_MOVIE_API_URL: http://localhost:5000
