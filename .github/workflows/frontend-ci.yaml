@@ -69,20 +69,20 @@ jobs:
     runs-on: ubuntu-latest
 
       steps:
-      # Check out the code from the repository.
-      - name: Check repository
-        uses: actions/checkout@v3
+        # Check out the code from the repository.
+        - name: Check repository
+          uses: actions/checkout@v3
 
-      # Set up a Node.js environment using the specified node version.
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: 'npm'
-          cache-dependency-path: starter/frontend/package-lock.json
+        # Set up a Node.js environment using the specified node version.
+        - name: Use Node.js 18
+          uses: actions/setup-node@v3
+          with:
+            node-version: 18
+            cache: 'npm'
+            cache-dependency-path: starter/frontend/package-lock.json
 
-      - name: Build Docker
-        run: |
-          cd starter/frontend
-          docker build --build-arg=${{ env.REACT_APP_MOVIE_API_URL }} --tag=mp-frontend:latest .
-          docker run --name mp-frontend -p 3000:3000 -d mp-frontend]        
+        - name: Build Docker
+          run: |
+            cd starter/frontend
+            docker build --build-arg=${{ env.REACT_APP_MOVIE_API_URL }} --tag=mp-frontend:latest .
+            docker run --name mp-frontend -p 3000:3000 -d mp-frontend]        
