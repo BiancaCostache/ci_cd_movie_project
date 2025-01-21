@@ -121,11 +121,11 @@ jobs:
       #       echo "Hardcoded AWS credentials found. Failing the pipeline." && exit 1
       #     fi
 
+
       - name: Check if Docker image pushed to ECR
         run: |
           aws ecr describe-images --repository-name my-repo --image-ids imageTag=${{ github.sha }}
         continue-on-error: false
-
 
       - name: Verify application running on Kubernetes
         run: |
