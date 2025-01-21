@@ -5,14 +5,14 @@ on:
   # Manual trigger
   workflow_dispatch:
   # Automatic trigger on pull requests merged on main branch
-  # push:
-  #   branches:
-  #     - main
-  # pull_request:
-  #   branches:
-      # - main
-    # paths:
-    #  - 'starter/frontend/**'
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+     - 'starter/frontend/**'
 
 env:
   REACT_APP_MOVIE_API_URL: http://localhost:5000
@@ -88,7 +88,8 @@ jobs:
       - name: Install dependencies
         run: cd starter/frontend && npm ci # if failing, use npm install
 
-      - name: Build Docker
+      # Build the Docker image.
+      - name: Build Docker image
         run: |
           cd starter/frontend
           docker build --build-arg=${{ env.REACT_APP_MOVIE_API_URL }} --tag=mp-frontend:latest .

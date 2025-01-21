@@ -3,11 +3,11 @@ name: Frontend Continuous Deployment
 on:
   workflow_dispatch:
 
-  # push:
-  #   branches:
-  #     - main
-    # paths:
-    #  - 'starter/frontend/**'
+  push:
+    branches:
+      - main
+    paths:
+     - 'starter/frontend/**'
 
 env:
   REACT_APP_MOVIE_API_URL: http://localhost:5000
@@ -84,6 +84,7 @@ jobs:
       - name: Install dependencies
         run: cd starter/frontend && npm ci
 
+      # Configure the AWS credentials.
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -92,29 +93,35 @@ jobs:
           aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
           aws-region: us-east-1
 
+      # Login into ECR Amazon.
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      # Build the Docker Image using the Git Hub Actions secrets.
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} starter/frontend
           docker tag ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
 
+       # Push the Docker Image into the ECR created backend repo.
       - name: Push Docker image to ECR
         run: |
           docker push ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }}
           docker push ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
 
+      # Update the kubeconfig for EKS purposes.
       - name: Update kubeconfig for EKS
         run: |
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
 
+      # Update the k8 manifests with the new image tag.
       - name: Update Kubernetes manifests with new image tag
         working-directory: starter/frontend/k8s
         run: |
           kustomize edit set image frontend=${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }}
 
+      # Apply k8 manifests.
       - name: Apply Kubernetes manifests
         working-directory: starter/frontend/k8s
         run: |

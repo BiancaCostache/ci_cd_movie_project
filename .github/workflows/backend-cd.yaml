@@ -78,6 +78,7 @@ jobs:
         with:
           python-version: "3.10"
 
+      # Configure the AWS credentials.
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -86,29 +87,35 @@ jobs:
           aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
           aws-region: us-east-1
   
+      # Login into ECR Amazon.
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      # Build the Docker Image using the Git Hub Actions secrets.
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }} starter/backend
           docker tag ${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }} ${{ secrets.ECR_REPO_URL_BACKEND }}:latest
 
-      - name: Push Docker image to ECR
+      # Push the Docker Image into the ECR created backend repo.
+      - name: Push Docker Image to ECR
         run: |
           docker push ${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }}
           docker push ${{ secrets.ECR_REPO_URL_BACKEND }}:latest
 
-      - name: Update kubeconfig for EKS
+      # Update the kubeconfig for EKS purposes.
+      - name: Update Kubeconfig for EKS
         run: |
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
 
+      # Update the k8 manifests with the new image tag.
       - name: Update Kubernetes manifests with new image tag
         working-directory: starter/backend/k8s
         run: |
           kustomize edit set image backend=${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }}
 
+      # Apply k8 manifests.
       - name: Apply Kubernetes manifests
         working-directory: starter/backend/k8s
         run: |

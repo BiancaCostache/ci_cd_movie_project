@@ -4,9 +4,9 @@ name: Backend Continuous Integration
 on:
   workflow_dispatch:
 
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
 
 jobs:
   lint:
@@ -78,7 +78,8 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Build Docker
+      # Build the Docker image.
+      - name: Build Docker image
         run: |
           cd starter/backend
           docker build --tag mp-backend:latest .
