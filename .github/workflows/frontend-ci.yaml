@@ -1,0 +1,88 @@
+name: Frontend Continuous Integration
+
+# Ensure the workflow runs on either manual trigger or fronted end app pull requests merged into main.
+on:
+  # Manual trigger
+  workflow_dispatch:
+  # Automatic trigger on pull requests merged on main branch
+  pull_request:
+    branches:
+      - main
+    paths:
+     - 'starter/frontend/**'
+
+env:
+  REACT_APP_MOVIE_API_URL: http://localhost:5000
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+# The workflow steps include installing dependencies, running tests, linting and building Docker.
+    steps:
+      # Check out the code from the repository.
+      - name: Check repository
+        uses: actions/checkout@v3
+
+      # Set up Node.js and restore cache for node_modules.
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: starter/frontend/package-lock.json
+
+      # Install the dependencies. 
+      - name: Install dependencies
+        run: cd starter/frontend && npm ci # if failing, use npm install
+
+      # Run the linter
+      - name: Run the linter
+        run: cd starter/frontend && npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the code from the repository.
+      - name: Check repository
+        uses: actions/checkout@v3
+
+      # Set up a Node.js environment using the specified node version.
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: starter/frontend/package-lock.json
+
+      # Install the dependencies.
+      - name: Install dependencies
+        run: cd starter/frontend && npm ci # if failing, use npm install
+
+      # Run the tests.
+      - name: Test run
+        run: cd starter/frontend && npm run test
+
+  build:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+
+      steps:
+      # Check out the code from the repository.
+      - name: Check repository
+        uses: actions/checkout@v3
+
+      # Set up a Node.js environment using the specified node version.
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: starter/frontend/package-lock.json
+
+      - name: Build Docker
+        run: |
+          cd starter/frontend
+          docker build --build-arg=${{ env.REACT_APP_MOVIE_API_URL }} --tag=mp-frontend:latest .
+          docker run --name mp-frontend -p 3000:3000 -d mp-frontend]        
