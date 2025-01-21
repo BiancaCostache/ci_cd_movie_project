@@ -6,8 +6,8 @@ on:
   push:
     branches:
       - main
-    paths:
-     - 'starter/frontend/**'
+    # paths:
+    #  - 'starter/frontend/**'
 
 env:
   REACT_APP_MOVIE_API_URL: http://localhost:5000
