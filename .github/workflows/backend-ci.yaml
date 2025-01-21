@@ -1,0 +1,85 @@
+name: Backend Continuous Integration
+
+# Ensure the workflow runs on either manual trigger or on push on main.
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+# The workflow steps include installing dependencies, running tests, linting and building Docker.
+    steps:
+      # Check out the code from the repository.
+      - name: Check repository
+        uses: actions/checkout@v3
+
+      # Set up Python
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      # Install dependencies.
+      - name: Install dependencies
+        working-directory: starter/backend 
+        run:  |
+          python -m pip install --upgrade pip
+          pip install pipenv
+          pip install flake8
+
+      # Run the linter
+      - name: Run the linter
+        run: cd starter/backend && pipenv run lint
+
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the code from the repository.
+      - name: Check repository
+        uses: actions/checkout@v3
+
+      # Set up Python
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      # Install dependencies.
+      - name: Install dependencies
+        working-directory: starter/backend 
+        run:  |
+          python -m pip install --upgrade pip
+          pip install pipenv
+          pip install flake8
+
+      # Run the tests.
+      - name: Test run
+        run: cd starter/backend && pipenv run test
+
+  build:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the code from the repository.
+      - name: Check repository
+        uses: actions/checkout@v3
+
+      # Set up Python
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Build Docker
+        run: |
+          cd starter/backend
+          docker build --tag mp-backend:latest .
+          docker run -p 5000:5000 --name mp-backend -d mp-backend
