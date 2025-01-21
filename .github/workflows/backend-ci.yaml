@@ -4,9 +4,9 @@ name: Backend Continuous Integration
 on:
   workflow_dispatch:
 
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
 
 jobs:
   lint:
@@ -61,7 +61,7 @@ jobs:
 
       # Run the tests.
       - name: Test run
-        run: cd starter/backend && pipenv run test
+        run: cd starter/backend && pipenv install pytest && pipenv run test
 
   build:
     needs: [lint, test]

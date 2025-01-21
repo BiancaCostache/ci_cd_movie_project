@@ -5,12 +5,12 @@ on:
   # Manual trigger
   workflow_dispatch:
   # Automatic trigger on pull requests merged on main branch
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
+  # pull_request:
+  #   branches:
+      # - main
     # paths:
     #  - 'starter/frontend/**'
 
@@ -37,7 +37,7 @@ jobs:
 
       # Install the dependencies. 
       - name: Install dependencies
-        run: cd starter/frontend && npm ci # if failing, use npm install
+        run: cd starter/frontend && npm ci
 
       # Run the linter
       - name: Run the linter
@@ -61,7 +61,7 @@ jobs:
 
       # Install the dependencies.
       - name: Install dependencies
-        run: cd starter/frontend && npm ci # if failing, use npm install
+        run: cd starter/frontend && npm ci
 
       # Run the tests.
       - name: Test run
