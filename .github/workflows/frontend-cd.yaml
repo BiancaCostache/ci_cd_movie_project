@@ -104,27 +104,27 @@ jobs:
       #     docker tag ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
 
 
+      Build the Docker Image using the Git Hub Actions secrets.
+      - name: Build Docker image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ secrets.ECR_REPO_URL_FRONTEND }}
+          IMAGE_TAG: ${{ github.sha }}
+          # REACT_APP_MOVIE_API_URL: ${{ secrets.REACT_APP_MOVIE_BACKEND_URL }}
+          REACT_APP_MOVIE_API_URL: http://a9fea8ded971f4c3e9ef61ac4c086f2d-1637249994.us-east-1.elb.amazonaws.com
+        run: |
+          docker build --build-arg=REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+
       # Build the Docker Image using the Git Hub Actions secrets.
       # - name: Build Docker image
       #   env:
       #     REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       #     REPOSITORY: ${{ secrets.ECR_REPO_URL_FRONTEND }}
       #     IMAGE_TAG: ${{ github.sha }}
-      #     # REACT_APP_MOVIE_API_URL: ${{ secrets.REACT_APP_MOVIE_BACKEND_URL }}
       #     REACT_APP_MOVIE_API_URL: http://a9fea8ded971f4c3e9ef61ac4c086f2d-1637249994.us-east-1.elb.amazonaws.com
       #   run: |
-      #     docker build --build-arg=REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-
-      # Build the Docker Image using the Git Hub Actions secrets.
-      - name: Build Docker image
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: ${{ secrets.ECR_REPO_URL_FRONTEND }}
-          IMAGE_TAG: ${{ github.sha }}
-          REACT_APP_MOVIE_API_URL: http://a9fea8ded971f4c3e9ef61ac4c086f2d-1637249994.us-east-1.elb.amazonaws.com
-        run: |
-          docker build --build-arg=REACT_APP_MOVIE_API_URL="http://$REACT_APP_MOVIE_API_URL/" -t ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} starter/frontend
-          docker tag ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
+      #     docker build --build-arg=REACT_APP_MOVIE_API_URL="http://$REACT_APP_MOVIE_API_URL/" -t ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} starter/frontend
+      #     docker tag ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
 
        # Push the Docker Image into the ECR created backend repo.
       - name: Push Docker image to ECR
