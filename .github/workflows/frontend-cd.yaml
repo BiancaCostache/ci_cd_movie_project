@@ -104,7 +104,7 @@ jobs:
       #     docker tag ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
 
 
-      Build the Docker Image using the Git Hub Actions secrets.
+      # Build the Docker Image using the Git Hub Actions secrets.
       - name: Build Docker image
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
