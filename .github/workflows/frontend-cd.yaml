@@ -3,11 +3,11 @@ name: Frontend Continuous Deployment
 on:
   workflow_dispatch:
 
-  push:
-    branches:
-      - main
-    paths:
-     - 'starter/frontend/**'
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #    - 'starter/frontend/**'
 
 env:
   REACT_APP_MOVIE_API_URL: http://localhost:5000
@@ -90,7 +90,6 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-          aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
           aws-region: us-east-1
 
       # Login into ECR Amazon.
