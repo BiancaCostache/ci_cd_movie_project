@@ -1,0 +1,131 @@
+name: Backend Continous Deployment
+
+# Ensure the workflow runs on either manual trigger or on push on main.
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+# The workflow steps include installing dependencies, running tests, linting and building Docker.
+    steps:
+      # Check out the code from the repository.
+      - name: Check repository
+        uses: actions/checkout@v3
+
+      # Set up Python
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      # Install dependencies.
+      - name: Install dependencies
+        working-directory: starter/backend 
+        run:  |
+          python -m pip install --upgrade pip
+          pip install pipenv
+          pip install flake8
+
+      # Run the linter
+      - name: Run the linter
+        run: cd starter/backend && pipenv run lint
+
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the code from the repository.
+      - name: Check repository
+        uses: actions/checkout@v3
+
+      # Set up Python
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      # Install dependencies.
+      - name: Install dependencies
+        working-directory: starter/backend 
+        run:  |
+          python -m pip install --upgrade pip
+          pip install pipenv
+          pip install flake8
+
+      # Run the tests.
+      - name: Test run
+        run: cd starter/backend && pipenv install pytest && pipenv run test
+
+  build:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the code from the repository.
+      - name: Check repository
+        uses: actions/checkout@v3
+
+      # Set up Python
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      # Configure the AWS credentials.
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          # aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
+          aws-region: us-east-1
+
+      # Login into ECR Amazon.
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Build the Docker Image using the Git Hub Actions secrets.
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }} starter/backend
+          docker tag ${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }} ${{ secrets.ECR_REPO_URL_BACKEND }}:latest
+
+      # Push the Docker Image into the ECR created backend repo.
+      - name: Push Docker Image to ECR
+        run: |
+          docker push ${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }}
+          docker push ${{ secrets.ECR_REPO_URL_BACKEND }}:latest
+
+      # Update the kubeconfig for EKS purposes.
+      - name: Update Kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+      # Update the k8 manifests with the new image tag.
+      - name: Update Kubernetes manifests with new image tag
+        working-directory: starter/backend/k8s
+        run: |
+          kustomize edit set image backend=${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }}
+
+      # Apply k8 manifests.
+      - name: Apply Kubernetes manifests
+        # env:
+          # AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          # AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          # AWS_SESSION_TOKEN: ${{secrets.AWS_SESSION_TOKEN}}
+          # AWS_REGION: us-east-1
+        working-directory: starter/backend/k8s
+        run: |
+          kustomize build | kubectl apply -f -
+
+        # aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
+        # aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
+        # aws configure set region "$AWS_REGION"
