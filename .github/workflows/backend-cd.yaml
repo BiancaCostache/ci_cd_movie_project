@@ -117,15 +117,15 @@ jobs:
 
       # Apply k8 manifests.
       - name: Apply Kubernetes manifests
-        # env:
-          # AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          # AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
           # AWS_SESSION_TOKEN: ${{secrets.AWS_SESSION_TOKEN}}
-          # AWS_REGION: us-east-1
+          AWS_REGION: us-east-1
         working-directory: starter/backend/k8s
         run: |
+          aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
+          aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
+          aws configure set region "$AWS_REGION"
           kustomize build | kubectl apply -f -
 
-        # aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
-        # aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
-        # aws configure set region "$AWS_REGION"
