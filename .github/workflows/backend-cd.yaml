@@ -103,7 +103,7 @@ jobs:
       - name: Push Docker Image to ECR
         run: |
           docker push ${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }}
-          docker push ${{ secrets.ECR_REPO_URL_BACKEND }}:latest
+        # docker push ${{ secrets.ECR_REPO_URL_BACKEND }}:latest
 
       # Update the kubeconfig for EKS purposes.
       - name: Update Kubeconfig for EKS
