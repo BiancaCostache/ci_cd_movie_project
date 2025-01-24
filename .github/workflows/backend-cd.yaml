@@ -96,7 +96,8 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }} starter/backend
-          docker tag ${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }} ${{ secrets.ECR_REPO_URL_BACKEND }}:latest
+          
+        # docker tag ${{ secrets.ECR_REPO_URL_BACKEND }}:${{ github.sha }} ${{ secrets.ECR_REPO_URL_BACKEND }}:latest
 
       # Push the Docker Image into the ECR created backend repo.
       - name: Push Docker Image to ECR
