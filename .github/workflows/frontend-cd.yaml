@@ -105,7 +105,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           REACT_APP_MOVIE_API_URL: ${{ secrets.REACT_APP_MOVIE_BACKEND_URL }}
         run: |
-          docker build --build-arg=REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL -t ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} starter/frontend
+          docker build --build-arg=REACT_APP_MOVIE_API_URL=${{ secrets.REACT_APP_MOVIE_BACKEND_URL }} -t ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} starter/frontend
           
         # docker build --build-arg=REACT_APP_MOVIE_API_URL="http://$REACT_APP_MOVIE_API_URL/" -t ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} starter/frontend
         # docker tag ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
