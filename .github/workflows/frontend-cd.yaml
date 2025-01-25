@@ -9,8 +9,6 @@ on:
     paths:
      - 'starter/frontend/**'
 
-env:
-  REACT_APP_MOVIE_API_URL: http://localhost:5000
 
 jobs:
   lint:
@@ -105,16 +103,18 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           REACT_APP_MOVIE_API_URL: ${{ secrets.REACT_APP_MOVIE_BACKEND_URL }}
         run: |
-          docker build --build-arg=REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL -t ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} starter/frontend
+          echo "REACT_APP_MOVIE_API_URL=${REACT_APP_MOVIE_API_URL}"
+          docker build --build-arg REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL -t ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} starter/frontend
           
+      - name: Print backend service URL
+        run: echo "${{ steps.get_be_service_url.outputs.be_service_url }}"
+
+        # TO TRY: docker build --build-arg=REACT_APP_MOVIE_API_URL=http://${{ steps.get_be_service_url.outputs.be_service_url }} --tag=362093802659.dkr.ecr.us-east-1.amazonaws.com/$REPO_NAME:$IMAGE_TAG .
         # docker build --build-arg=REACT_APP_MOVIE_API_URL="http://$REACT_APP_MOVIE_API_URL/" -t ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} starter/frontend
-        # docker tag ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }} ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
       
-       # Push the Docker Image into the ECR created backend repo.
       - name: Push Docker image to ECR
         run: |
           docker push ${{ secrets.ECR_REPO_URL_FRONTEND }}:${{ github.sha }}
-        # docker push ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
 
       # Update the kubeconfig for EKS purposes.
       - name: Update kubeconfig for EKS
@@ -132,3 +132,4 @@ jobs:
         working-directory: starter/frontend/k8s
         run: |
           kustomize build | kubectl apply -f -
+  
